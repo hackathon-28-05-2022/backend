@@ -14,8 +14,8 @@ class User(AbstractUser):
     electricity = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Электричество', default=0)
     pulse = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Пульс', default=0)
     coin_balance = models.DecimalField(max_digits=30, decimal_places=20, verbose_name='Монет', default=0)
-    last_visit = models.DateTimeField(timezone.now)
-    day_visited_in_a_row = models.PositiveIntegerField(default=0)
+    last_time_gained_pulse = models.DateTimeField(default=timezone.now)
+    day_visited_in_a_row = models.PositiveIntegerField(default=1)
 
     def _correct_pulse(self):
         if self.pulse > 100:
