@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.template.defaultfilters import slugify
@@ -33,9 +35,9 @@ class User(AbstractUser):
         self.electricity = electricity_amount
         self.save()
 
-    def get_user_weight_for_grading(self) -> float:
+    def get_user_weight_for_grading(self) -> Decimal:
         """Получить значение рейтинга от 0 до 2 исходя из пульса пользователя"""
-        return 0.02 * self.pulse
+        return Decimal(0.02) * self.pulse
 
 
 class Post(models.Model):
@@ -48,8 +50,8 @@ class Post(models.Model):
     body = models.TextField(verbose_name='Тело поста')
     author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор')
     created_at = models.DateTimeField(default=timezone.now)
-    rating = models.PositiveIntegerField()
-    views_count = models.PositiveIntegerField()
+    rating = models.PositiveIntegerField(default=0)
+    views_count = models.PositiveIntegerField(default=0)
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -115,7 +117,7 @@ class Grade(models.Model):
     is_like = models.BooleanField(default=False)
     is_dislike = models.BooleanField(default=False)
     post = models.ForeignKey(to=Post, verbose_name='Пост', on_delete=models.CASCADE, null=True)
-    comment = models.ForeignKey(to=Comment, verbose_name='Комментарий', on_delete=models.CASCADE)
+    comment = models.ForeignKey(to=Comment, verbose_name='Комментарий', on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def get_likes_on_comment(self, comment):
@@ -125,18 +127,25 @@ class Grade(models.Model):
         return self.objects.filter(is_dislike=True, comment=comment).count()
 
     def _vote_for_post_or_comment(self, user: User, is_like: bool, is_dislike: bool,
-                                  post: Post = None, comment: Comment = None):
+                                  post: Post = None, comment: Comment = None) -> bool:
+        """return is_success"""
         if post and comment:
             raise Exception('post and comment not None error')
         if is_like and is_dislike:
             raise Exception('is_like and is_dislike True error')
+        if post:
+            if Grade.objects.filter(grader=user, post=post).count() >= 1:
+                return False
+        if comment:
+            if Grade.objects.filter(grader=user, comment=comment).count() >= 1:
+                return False
         self.is_like = is_like
         self.is_dislike = is_dislike
         self.grader = user
         self.post = post
         self.comment = comment
         self.grader.electricity = -1  # TODO: remove hardcode
-        _effect_on_the_author = 0.5 * self.post.author.get_user_weight_for_grading()  # TODO: remove hardcode
+        _effect_on_the_author = Decimal(0.5) * self.post.author.get_user_weight_for_grading()  # TODO: remove hardcode
         if is_dislike:
             _effect_on_the_author *= -1  # TODO: remove hardcode
         if post:
@@ -148,18 +157,19 @@ class Grade(models.Model):
 
         self.save()
         user.set_pulse(user.pulse + 10)  # TODO: remove hardcode
+        return True
 
     def like_post(self, user: User, post: Post):
         """Лайкнуть пост"""
-        self._vote_for_post_or_comment(user, is_like=True, is_dislike=False, post=post)
+        return self._vote_for_post_or_comment(user, is_like=True, is_dislike=False, post=post)
 
     def dislike_post(self, user: User, post: Post):
         """Дизлайкнуть пост"""
-        self._vote_for_post_or_comment(user, is_like=False, is_dislike=True, post=post)
+        return self._vote_for_post_or_comment(user, is_like=False, is_dislike=True, post=post)
 
-    def cancel_vote_post(self, user: User, post: Post):
-        """Отменить лайк/дизлайк на пост"""
-        self._vote_for_post_or_comment(user, is_like=False, is_dislike=False, post=post)
+    # def cancel_vote_post(self, user: User, post: Post):
+    #     """Отменить лайк/дизлайк на пост"""
+    #     self._vote_for_post_or_comment(user, is_like=False, is_dislike=False, post=post)
 
     def like_comment(self, user: User, comment: Comment):
         """Лайкнуть комментарий"""
@@ -169,9 +179,9 @@ class Grade(models.Model):
         """Дизлайкнуть комментарий"""
         self._vote_for_post_or_comment(user, is_like=False, is_dislike=True, comment=comment)
 
-    def cancel_vote_comment(self, user: User, comment: Comment):
-        """Отменить лайк/дизлайк на комментарий"""
-        self._vote_for_post_or_comment(user, is_like=False, is_dislike=False, comment=comment)
+    # def cancel_vote_comment(self, user: User, comment: Comment):
+    #     """Отменить лайк/дизлайк на комментарий"""
+    #     self._vote_for_post_or_comment(user, is_like=False, is_dislike=False, comment=comment)
 
 
 class Advert(models.Model):

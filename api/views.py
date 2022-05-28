@@ -6,7 +6,7 @@ from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework.views import APIView
 
-from api.models import Post, User, Comment
+from api.models import Post, User, Comment, Grade
 from api.pagination import StandardResultsSetPagination, PageResultsSetPagination
 from api.serializers import PostSerializer, UserSerializer, CommentSerializer
 
@@ -19,6 +19,10 @@ class PostList(generics.ListAPIView):
         return Post.objects.all().order_by('-rating')
 
 
+class PostCreate(generics.CreateAPIView):
+    serializer_class = PostSerializer
+
+
 class PostAddView(APIView):
     def post(self, request):
         data = request.POST
@@ -27,6 +31,26 @@ class PostAddView(APIView):
         post.views_count += 1
         post.save()
         return JsonResponse({'status': 'OK'})
+
+
+class LikePost(APIView):
+    def get(self, request, post_id):
+        post = Post.objects.get(id=post_id)
+        status = Grade().like_post(user=request.user, post=post)
+        if status:
+            return JsonResponse({'status': 'OK'})
+        else:
+            return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+
+
+class DisLikePost(APIView):
+    def get(self, request, post_id):
+        post = Post.objects.get(id=post_id)
+        status = Grade().dislike_post(user=request.user, post=post)
+        if status:
+            return JsonResponse({'status': 'OK'})
+        else:
+            return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
 
 
 class UserMe(viewsets.ReadOnlyModelViewSet):
