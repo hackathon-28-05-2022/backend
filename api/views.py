@@ -39,8 +39,7 @@ class LikePost(APIView):
         status = Grade().like_post(user=request.user, post=post)
         if status:
             return JsonResponse({'status': 'OK'})
-        else:
-            return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+        return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
 
 
 class DisLikePost(APIView):
@@ -49,8 +48,25 @@ class DisLikePost(APIView):
         status = Grade().dislike_post(user=request.user, post=post)
         if status:
             return JsonResponse({'status': 'OK'})
-        else:
-            return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+        return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+
+
+class LikeComment(APIView):
+    def get(self, request, comment_id):
+        comment = Comment.objects.get(id=comment_id)
+        status = Grade().like_comment(user=request.user, comment=comment)
+        if status:
+            return JsonResponse({'status': 'OK'})
+        return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+
+
+class DisLikeComment(APIView):
+    def get(self, request, comment_id):
+        comment = Comment.objects.get(id=comment_id)
+        status = Grade().dislike_comment(user=request.user, comment=comment)
+        if status:
+            return JsonResponse({'status': 'OK'})
+        return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
 
 
 class UserMe(viewsets.ReadOnlyModelViewSet):

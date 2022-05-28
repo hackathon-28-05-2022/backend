@@ -145,7 +145,12 @@ class Grade(models.Model):
         self.post = post
         self.comment = comment
         self.grader.electricity = -1  # TODO: remove hardcode
-        _effect_on_the_author = Decimal(0.5) * self.post.author.get_user_weight_for_grading()  # TODO: remove hardcode
+        if post:
+            _effect_on_the_author = Decimal(0.5) * \
+                                    self.post.author.get_user_weight_for_grading()  # TODO: remove hardcode
+        if comment:
+            _effect_on_the_author = Decimal(0.5) * \
+                                    self.comment.author.get_user_weight_for_grading()  # TODO: remove hardcode
         if is_dislike:
             _effect_on_the_author *= -1  # TODO: remove hardcode
         if post:
@@ -173,11 +178,11 @@ class Grade(models.Model):
 
     def like_comment(self, user: User, comment: Comment):
         """Лайкнуть комментарий"""
-        self._vote_for_post_or_comment(user, is_like=True, is_dislike=False, comment=comment)
+        return self._vote_for_post_or_comment(user, is_like=True, is_dislike=False, comment=comment)
 
     def dislike_comment(self, user: User, comment: Comment):
         """Дизлайкнуть комментарий"""
-        self._vote_for_post_or_comment(user, is_like=False, is_dislike=True, comment=comment)
+        return self._vote_for_post_or_comment(user, is_like=False, is_dislike=True, comment=comment)
 
     # def cancel_vote_comment(self, user: User, comment: Comment):
     #     """Отменить лайк/дизлайк на комментарий"""

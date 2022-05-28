@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['body', 'author', 'created_at', 'dislikes_count', 'likes_count']
+        fields = ['body', 'author', 'created_at', 'dislikes_count', 'likes_count', 'id']
 
     dislikes_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
