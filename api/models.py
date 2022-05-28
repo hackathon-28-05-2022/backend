@@ -43,6 +43,7 @@ class Comment(models.Model):
 
     body = models.TextField(verbose_name='Тело комментария')
     author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор')
+    post = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Пост')
     created_at = models.DateTimeField(default=timezone.now)
 
 
