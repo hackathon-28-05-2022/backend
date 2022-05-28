@@ -15,6 +15,14 @@ class User(AbstractUser):
     pulse = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Пульс')
     coin_balance = models.DecimalField(max_digits=30, decimal_places=20, verbose_name='Монет')
 
+    def set_pulse(self, pulse_amount):
+        self.pulse = pulse_amount
+        self.save()
+
+    def set_electricity(self, electricity_amount):
+        self.electricity = electricity_amount
+        self.save()
+
 
 class Post(models.Model):
     class Meta:
