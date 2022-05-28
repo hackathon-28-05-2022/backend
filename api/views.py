@@ -16,8 +16,8 @@ class PostList(generics.ListAPIView):
         return Post.objects.all().order_by('-rating')
 
 
-class UserMe(APIView):
+class UserMe(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        return self.request.user
+        return [self.request.user]

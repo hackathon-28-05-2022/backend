@@ -23,6 +23,9 @@ class User(AbstractUser):
         self.electricity = electricity_amount
         self.save()
 
+    def get_user_weight_for_grading(self) -> float:
+        return 0.02 * self.pulse  # return linear from 0 to 2
+
 
 class Post(models.Model):
     class Meta:
