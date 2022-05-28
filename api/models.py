@@ -11,9 +11,9 @@ class User(AbstractUser):
         verbose_name = 'Пользователи'
         verbose_name_plural = 'Пользователь'
 
-    electricity = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Электричество')
-    pulse = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Пульс')
-    coin_balance = models.DecimalField(max_digits=30, decimal_places=20, verbose_name='Монет')
+    electricity = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Электричество', default=0)
+    pulse = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Пульс', default=0)
+    coin_balance = models.DecimalField(max_digits=30, decimal_places=20, verbose_name='Монет', default=0)
 
 
 class Post(models.Model):
