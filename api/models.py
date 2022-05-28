@@ -24,6 +24,7 @@ class Post(models.Model):
     body = models.TextField(verbose_name='Тело поста')
     author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор')
     created_at = models.DateTimeField(default=timezone.now)
+    rating = models.DecimalField(default=0, max_digits=10, decimal_places=5)
 
 
 class Comment(models.Model):
