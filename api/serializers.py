@@ -29,7 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['electricity', 'username', 'coin_balance', 'created_at']
+        fields = ['electricity', 'username', 'coin_balance', 'date_joined', 'pulse']
 
 
 class CommentSerializer(serializers.ModelSerializer):

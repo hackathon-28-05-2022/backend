@@ -14,12 +14,19 @@ class User(AbstractUser):
     electricity = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Электричество', default=0)
     pulse = models.DecimalField(max_digits=10, decimal_places=5, verbose_name='Пульс', default=0)
     coin_balance = models.DecimalField(max_digits=30, decimal_places=20, verbose_name='Монет', default=0)
-    last_visit = models.DateField(timezone.now)
+    last_visit = models.DateTimeField(timezone.now)
+    day_visited_in_a_row = models.PositiveIntegerField(default=0)
+
+    def _correct_pulse(self):
+        if self.pulse > 100:
+            self.pulse = 100
+            self.save()
 
     def set_pulse(self, pulse_amount):
         """Сеттер пульса пользователя"""
         self.pulse = pulse_amount
         self.save()
+        self._correct_pulse()
 
     def set_electricity(self, electricity_amount):
         """Сеттер энергии пользователя"""

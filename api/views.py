@@ -7,11 +7,12 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 
 from api.models import Post, User, Comment
-from api.pagination import StandardResultsSetPagination
+from api.pagination import StandardResultsSetPagination, PageResultsSetPagination
 from api.serializers import PostSerializer, UserSerializer, CommentSerializer
 
 
 class PostList(generics.ListAPIView):
+    pagination_class = PageResultsSetPagination
     serializer_class = PostSerializer
 
     def get_queryset(self):
