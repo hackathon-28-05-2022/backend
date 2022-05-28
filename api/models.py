@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.template.defaultfilters import slugify
 
 # Create your models here.
 from django.utils import timezone
@@ -20,11 +21,19 @@ class Post(models.Model):
         verbose_name = 'Посты'
         verbose_name_plural = 'Пост'
 
+    slug = models.SlugField(unique=True)
     title = models.TextField(verbose_name='Название')
     body = models.TextField(verbose_name='Тело поста')
     author = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name='Автор')
     created_at = models.DateTimeField(default=timezone.now)
     rating = models.DecimalField(default=0, max_digits=10, decimal_places=5)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            # Newly created object, so set slug
+            self.s = slugify(self.title)
+
+        super(Post, self).save(*args, **kwargs)
 
 
 class Comment(models.Model):
