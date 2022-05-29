@@ -3,6 +3,12 @@ from rest_framework import serializers
 from api.models import Post, User, Grade, Comment
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['electricity', 'username', 'coin_balance', 'date_joined', 'pulse']
+
+
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
@@ -18,18 +24,13 @@ class PostSerializer(serializers.ModelSerializer):
 
     likes_count = serializers.SerializerMethodField()
     dislikes_count = serializers.SerializerMethodField()
+    author = UserSerializer()
 
     def get_likes_count(self, post):
         return Grade.objects.filter(is_like=True, post=post).count()
 
     def get_dislikes_count(self, post):
         return Grade.objects.filter(is_dislike=True, post=post).count()
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['electricity', 'username', 'coin_balance', 'date_joined', 'pulse']
 
 
 class CommentSerializer(serializers.ModelSerializer):
