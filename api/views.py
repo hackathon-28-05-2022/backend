@@ -12,6 +12,7 @@ from api.serializers import PostSerializer, UserSerializer, CommentSerializer
 
 
 class PostList(generics.ListAPIView):
+    """Список постов, списки сортированы по рейтингу, рейтинг скрыт"""
     pagination_class = PageResultsSetPagination
     serializer_class = PostSerializer
 
@@ -20,6 +21,7 @@ class PostList(generics.ListAPIView):
 
 
 class PostCreate(generics.CreateAPIView):
+    """Создание поста"""
     serializer_class = PostSerializer
 
 
@@ -34,6 +36,7 @@ class PostAddView(APIView):
 
 
 class LikePost(APIView):
+    """Позволяет лайкнуть пост."""
     def get(self, request, post_id):
         post = Post.objects.get(id=post_id)
         status = Grade().like_post(user=request.user, post=post)
@@ -43,6 +46,7 @@ class LikePost(APIView):
 
 
 class DisLikePost(APIView):
+    """Позволяет дизлайкнуть пост."""
     def get(self, request, post_id):
         post = Post.objects.get(id=post_id)
         status = Grade().dislike_post(user=request.user, post=post)
@@ -52,6 +56,7 @@ class DisLikePost(APIView):
 
 
 class LikeComment(APIView):
+    """Позволяет лайкнуть коммент."""
     def get(self, request, comment_id):
         comment = Comment.objects.get(id=comment_id)
         status = Grade().like_comment(user=request.user, comment=comment)
@@ -61,6 +66,7 @@ class LikeComment(APIView):
 
 
 class DisLikeComment(APIView):
+    """Позволяет дизлайкнуть коммент."""
     def get(self, request, comment_id):
         comment = Comment.objects.get(id=comment_id)
         status = Grade().dislike_comment(user=request.user, comment=comment)
