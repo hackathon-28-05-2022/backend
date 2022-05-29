@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django.contrib.auth.models import AbstractUser
@@ -18,6 +19,29 @@ class User(AbstractUser):
     coin_balance = models.DecimalField(max_digits=30, decimal_places=20, verbose_name='Монет', default=0)
     last_time_gained_pulse = models.DateTimeField(default=timezone.now)
     day_visited_in_a_row = models.PositiveIntegerField(default=1)
+
+    @property
+    def token(self):
+        """
+        Позволяет получить токен пользователя путем вызова user.token, вместо
+        user._generate_jwt_token(). Декоратор @property выше делает это
+        возможным. token называется "динамическим свойством".
+        """
+        return self._generate_jwt_token()
+
+    def _generate_jwt_token(self):
+        """
+        Генерирует веб-токен JSON, в котором хранится идентификатор этого
+        пользователя, срок действия токена составляет 1 день от создания
+        """
+        dt = datetime.now() + timedelta(days=1)
+
+        token = jwt.encode({
+            'id': self.pk,
+            'exp': int(dt.strftime('%s'))
+        }, settings.SECRET_KEY, algorithm='HS256')
+
+        return token.decode('utf-8')
 
     def _correct_pulse(self):
         if self.pulse > 100:
