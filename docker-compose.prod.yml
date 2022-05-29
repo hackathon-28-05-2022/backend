@@ -5,7 +5,7 @@ services:
     build:
       context: ./django
       dockerfile: Dockerfile.prod
-    command: gunicorn BotWeb.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn Hackaton.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/web/staticfiles
     expose:
@@ -29,14 +29,14 @@ services:
       - 443:443
     depends_on:
       - web
-  authbot:
-    command: python manage.py authbot
-    build: ./django
-    depends_on:
-      - db
-      - web
-    env_file:
-      - ./.env.prod
+#  authbot:
+#    command: python manage.py authbot
+#    build: ./django
+#    depends_on:
+#      - db
+#      - web
+#    env_file:
+#      - ./.env.prod
 
 volumes:
   postgres_data:
