@@ -1,4 +1,6 @@
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from rest_framework.documentation import include_docs_urls
 
 from api.views import PostList, UserMe, CommentForPostList, PostAddView, PostCreate, LikePost, DisLikePost, LikeComment, \
     DisLikeComment
@@ -26,4 +28,5 @@ urlpatterns = [
     path('comments/like/<int:comment_id>/', LikeComment.as_view()),
     path('comments/dislike/<int:comment_id>/', DisLikeComment.as_view()),
 
+    path('docs/', include_docs_urls(title='ABOBA Inn'))
 ]
