@@ -12,8 +12,8 @@ class LastVisitedHandle:
                 request.user.last_time_gained_pulse = timezone.now()
                 request.user.set_pulse(request.user.pulse + 10 * request.user.day_visited_in_a_row)  # TODO: remove hardcode
                 request.user.day_visited_in_a_row += 1
-                if randrange(1000 // request.user.day_visited_in_a_row) == 0:
-                    request.user.set_electricity(request.user.electricity + 10)  # TODO: remove hardcode
+                if randrange(1000 // request.user.day_visited_in_a_row) == 0:  # TODO: remove hardcode
+                    request.user.set_electricity(request.user.electricity + 100)  # TODO: remove hardcode
                 request.user.save()
         response = self._get_response(request)
         return response

@@ -67,8 +67,33 @@ class User(AbstractUser):
         self.save()
 
     def get_user_weight_for_grading(self) -> Decimal:
-        """Получить значение рейтинга от 0 до 2 исходя из пульса пользователя"""
-        return Decimal(0.02) * self.pulse
+        """Получить значение рейтинга от 0 до 2 исходя из пульса пользователя по закону тангенса"""
+        x = float(self.pulse)
+        if x >= 100:
+            return Decimal(2)
+        if x <= 0:
+            return Decimal(0)
+        return Decimal(0.0966347 + 0.0555695 * (x - 0.00112507) * x ** 2 + (7.50045 * 1e-6) * x ** 3)
+
+    def count_grade_day(self):
+        return Grade.objects.filter(
+            grader=self,
+            created_at__day=timezone.now().day,
+            created_at__year=timezone.now().year,
+            created_at__month=timezone.now().month,
+        ).count()
+
+    def count_grade_day_to_user(self, user_to_grade, post=None, comment=None):
+        grades = Grade.objects.filter(
+            grader=self,
+            created_at__day=timezone.now().day,
+            created_at__year=timezone.now().year,
+            created_at__month=timezone.now().month,
+        )
+        if comment:
+            return grades.filter(comment__author=user_to_grade).count()
+        if post:
+            return grades.filter(post__author=user_to_grade).count()
 
 
 class Post(models.Model):
@@ -165,11 +190,17 @@ class Grade(models.Model):
             raise Exception('post and comment not None error')
         if is_like and is_dislike:
             raise Exception('is_like and is_dislike True error')
+        if user.count_grade_day() > 50:
+            return False
         if post:
             if Grade.objects.filter(grader=user, post=post).count() >= 1:
                 return False
+            if user.count_grade_day_to_user(post.author, post) > 5:  # TODO: remove hardcode
+                return False
         if comment:
             if Grade.objects.filter(grader=user, comment=comment).count() >= 1:
+                return False
+            if user.count_grade_day_to_user(comment.author, comment) > 5:  # TODO: remove hardcode
                 return False
         self.is_like = is_like
         self.is_dislike = is_dislike
