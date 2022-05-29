@@ -10,9 +10,9 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
-from .views import ListLots
+from .views import ListLots, BuyLot
 
 urlpatterns = [
     path('list/', ListLots.as_view()),
-
+    path('buy/', BuyLot.as_view()),
 ]

@@ -53,6 +53,8 @@ class CommentSerializer(serializers.ModelSerializer):
 class AdvertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advert
-        fields = ['url', 'image', 'view_count', 'owner', 'created_at']
+        fields = ['id', 'url', 'image', 'view_count', 'owner', 'created_at']
 
     owner = UserSerializer()
+    read_only = ['owner', 'id', 'created_at']
+

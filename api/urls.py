@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.documentation import include_docs_urls
 
 from api.views import PostList, UserMe, CommentForPostList, PostAddView, PostCreate, LikePost, DisLikePost, LikeComment, \
-    DisLikeComment, AdvertList
+    DisLikeComment, AdvertList, AdvertAddView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -18,7 +18,7 @@ urlpatterns = [
 
     path('posts/list/by_raiting/', PostList.as_view()),
     path('posts/create/', PostCreate.as_view()),
-    path('posts/add_view/', PostAddView.as_view()),
+    path('posts/add_view/<int:post_id>/', PostAddView.as_view()),
     path('posts/like/<int:post_id>/', LikePost.as_view()),
     path('posts/dislike/<int:post_id>/', DisLikePost.as_view()),
 
@@ -29,5 +29,7 @@ urlpatterns = [
     path('comments/dislike/<int:comment_id>/', DisLikeComment.as_view()),
 
     path('advert/list/', AdvertList.as_view()),
-    path('docs/', include_docs_urls(title='ABOBA Inn'))
+    path('advert/add_view/<int:advert_id>/', AdvertAddView.as_view()),
+
+    path('docs/', include_docs_urls(title='Kotyata Entertainment Incorporation')),
 ]

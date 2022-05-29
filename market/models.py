@@ -19,18 +19,20 @@ class Lot(models.Model):
     is_canceled = models.BooleanField(default=False)
     is_closed = models.BooleanField(default=False)
 
-    def buy_lot(self):
-        if self.buyer.coin_balance >= self.amount_coins:
+    def buy_lot(self, buyer):
+        if buyer.coin_balance >= self.amount_coins:
             # TODO: smart contract
-            self.buyer.set_coin(self.buyer.coin_balance - self.amount_coins)
+            buyer.set_coin(self.buyer.coin_balance - self.amount_coins)
             self.seller.set_coin(self.seller.coin_balance + self.amount_coins)
 
-            self.buyer.set_electricity(self.buyer.electricity + self.amount_electricity)
-            self.seller.set_electricity(self.seller.electricity + self.amount_electricity)
+            buyer.set_electricity(self.buyer.electricity + self.amount_electricity)
+            self.seller.set_electricity(self.seller.electricity - self.amount_electricity)
 
             self.closed_at = timezone.now()
             self.is_closed = True
             self.is_committed = True
+
+            buyer.save()
             self.save()
 
             return {'status': 'OK'}

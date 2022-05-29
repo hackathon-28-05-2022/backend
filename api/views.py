@@ -27,9 +27,7 @@ class PostCreate(generics.CreateAPIView):
 
 
 class PostAddView(APIView):
-    def post(self, request):
-        data = request.POST
-        post_id = data.get('post_id')
+    def get(self, request, post_id):
         post = Post.objects.get(id=post_id)
         post.views_count += 1
         post.save()
@@ -101,3 +99,19 @@ class AdvertList(generics.ListAPIView):
 
     def get_queryset(self):
         return Advert.objects.filter(is_active=True)
+
+
+class AdvertAddView(APIView):
+    def get(self, request, advert_id):
+        advert = Advert.objects.get(id=advert_id)
+        advert.view_count += 1
+        advert.save()
+        return JsonResponse({'status': "OK"})
+
+
+class AdvertBuy(generics.CreateAPIView):
+    serializer_class = AdvertSerializer
+
+    def create(self, request, *args, **kwargs):
+        pass
+
