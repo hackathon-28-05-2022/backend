@@ -4,11 +4,12 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework import generics
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from api.models import Post, User, Comment, Grade
+from api.models import Post, User, Comment, Grade, Advert
 from api.pagination import StandardResultsSetPagination, PageResultsSetPagination
-from api.serializers import PostSerializer, UserSerializer, CommentSerializer
+from api.serializers import PostSerializer, UserSerializer, CommentSerializer, AdvertSerializer
 
 
 class PostList(generics.ListAPIView):
@@ -37,46 +38,51 @@ class PostAddView(APIView):
 
 class LikePost(APIView):
     """Позволяет лайкнуть пост."""
+
     def get(self, request, post_id):
         post = Post.objects.get(id=post_id)
         status = Grade().like_post(user=request.user, post=post)
         if status:
             return JsonResponse({'status': 'OK'})
-        return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+        return JsonResponse({'status': 'Error', 'Error': 'Вы уже оценили этот пост'})
 
 
 class DisLikePost(APIView):
     """Позволяет дизлайкнуть пост."""
+
     def get(self, request, post_id):
         post = Post.objects.get(id=post_id)
         status = Grade().dislike_post(user=request.user, post=post)
         if status:
             return JsonResponse({'status': 'OK'})
-        return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+        return JsonResponse({'status': 'Error', 'Error': 'Вы уже оценили этот пост'})
 
 
 class LikeComment(APIView):
     """Позволяет лайкнуть коммент."""
+
     def get(self, request, comment_id):
         comment = Comment.objects.get(id=comment_id)
         status = Grade().like_comment(user=request.user, comment=comment)
         if status:
             return JsonResponse({'status': 'OK'})
-        return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+        return JsonResponse({'status': 'Error', 'Error': 'Вы уже оценили этот пост'})
 
 
 class DisLikeComment(APIView):
     """Позволяет дизлайкнуть коммент."""
+
     def get(self, request, comment_id):
         comment = Comment.objects.get(id=comment_id)
         status = Grade().dislike_comment(user=request.user, comment=comment)
         if status:
             return JsonResponse({'status': 'OK'})
-        return JsonResponse({'status': 'error', 'error': 'Вы уже оценили этот пост'})
+        return JsonResponse({'status': 'Error', 'Error': 'Вы уже оценили этот пост'})
 
 
 class UserMe(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return [self.request.user]
@@ -88,3 +94,10 @@ class CommentForPostList(generics.ListAPIView):
 
     def get_queryset(self):
         return Comment.objects.filter(post_id=self.kwargs.get('post_id')).order_by('rating')
+
+
+class AdvertList(generics.ListAPIView):
+    serializer_class = AdvertSerializer
+
+    def get_queryset(self):
+        return Advert.objects.filter(is_active=True)

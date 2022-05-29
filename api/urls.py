@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.documentation import include_docs_urls
 
 from api.views import PostList, UserMe, CommentForPostList, PostAddView, PostCreate, LikePost, DisLikePost, LikeComment, \
-    DisLikeComment
+    DisLikeComment, AdvertList
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -28,5 +28,6 @@ urlpatterns = [
     path('comments/like/<int:comment_id>/', LikeComment.as_view()),
     path('comments/dislike/<int:comment_id>/', DisLikeComment.as_view()),
 
+    path('advert/list/', AdvertList.as_view()),
     path('docs/', include_docs_urls(title='ABOBA Inn'))
 ]

@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+import jwt
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.template.defaultfilters import slugify
 
 # Create your models here.
 from django.utils import timezone
+
+from Hackaton import settings
 
 
 class User(AbstractUser):
@@ -59,6 +62,10 @@ class User(AbstractUser):
         self.electricity = electricity_amount
         self.save()
 
+    def set_coin(self, coin_amount):
+        self.coin_balance = coin_amount
+        self.save()
+
     def get_user_weight_for_grading(self) -> Decimal:
         """Получить значение рейтинга от 0 до 2 исходя из пульса пользователя"""
         return Decimal(0.02) * self.pulse
@@ -76,6 +83,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     rating = models.PositiveIntegerField(default=0)
     views_count = models.PositiveIntegerField(default=0)
+    image_url = models.URLField()
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -90,8 +98,8 @@ class Post(models.Model):
     def count_dislikes_on_post(self):
         return Grade.objects.filter(post=self, is_dislike=True).count()
 
-    def set_calculated_rating(self):
-        self.rating = self.count_likes_on_post() + self.count_dislikes_on_post()
+    def _set_calculated_rating(self):
+        self.rating = self.count_likes_on_post() + self.count_dislikes_on_post() + self.views_count
         self.save()
 
     def add_post(self, title: str, body: str, author: User):
@@ -127,7 +135,7 @@ class Comment(models.Model):
     def count_dislikes(self):
         return Grade.objects.filter(comment=self, is_dislike=True).count()
 
-    def set_calculated_rating(self):
+    def _set_calculated_rating(self):
         self.rating = self.count_likes() + self.count_dislikes()
         self.save()
 
@@ -178,10 +186,10 @@ class Grade(models.Model):
         if is_dislike:
             _effect_on_the_author *= -1  # TODO: remove hardcode
         if post:
-            self.post.set_calculated_rating()
+            self.post._set_calculated_rating()
             self.post.author.set_electricity(self.post.author.electricity + _effect_on_the_author)
         if comment:
-            self.comment.set_calculated_rating()
+            self.comment._set_calculated_rating()
             self.comment.author.set_electricity(self.comment.author.electricity + _effect_on_the_author)
 
         self.save()
@@ -196,10 +204,6 @@ class Grade(models.Model):
         """Дизлайкнуть пост"""
         return self._vote_for_post_or_comment(user, is_like=False, is_dislike=True, post=post)
 
-    # def cancel_vote_post(self, user: User, post: Post):
-    #     """Отменить лайк/дизлайк на пост"""
-    #     self._vote_for_post_or_comment(user, is_like=False, is_dislike=False, post=post)
-
     def like_comment(self, user: User, comment: Comment):
         """Лайкнуть комментарий"""
         return self._vote_for_post_or_comment(user, is_like=True, is_dislike=False, comment=comment)
@@ -207,10 +211,6 @@ class Grade(models.Model):
     def dislike_comment(self, user: User, comment: Comment):
         """Дизлайкнуть комментарий"""
         return self._vote_for_post_or_comment(user, is_like=False, is_dislike=True, comment=comment)
-
-    # def cancel_vote_comment(self, user: User, comment: Comment):
-    #     """Отменить лайк/дизлайк на комментарий"""
-    #     self._vote_for_post_or_comment(user, is_like=False, is_dislike=False, comment=comment)
 
 
 class Advert(models.Model):
@@ -220,12 +220,16 @@ class Advert(models.Model):
 
     url = models.URLField()
     image = models.URLField()
-    view_count = models.PositiveIntegerField()
+    view_count = models.PositiveIntegerField(default=0)
+    owner = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
 
-    def add_advert(self, url: str, image: str):
-        """Добавить рекламный баннер"""
+    def buy_advert(self, url: str, image: str, owner: User, price: Decimal):
+        """Купить рекламный баннер"""
         self.url = url
         self.image = image
+        self.owner = owner
+        owner.set_electricity(owner.electricity - price)  # TODO: smart contract
+        self.is_active = True  # TODO: set to False by crontab
         self.save()
-        # TODO: надо добавить пользователя, который добавляет рекламу, и списывать с этого пользователя энергию,
-        #  затрачиваемую за размещение

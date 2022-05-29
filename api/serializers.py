@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import Post, User, Grade, Comment
+from api.models import Post, User, Grade, Comment, Advert
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,6 +20,7 @@ class PostSerializer(serializers.ModelSerializer):
             'id',
             'likes_count',
             'dislikes_count',
+            'image_url'
         ]
 
     likes_count = serializers.SerializerMethodField()
@@ -40,9 +41,18 @@ class CommentSerializer(serializers.ModelSerializer):
 
     dislikes_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
+    author = UserSerializer()
 
     def get_likes_count(self, comment):
-        return Grade.objects.filter(is_like=True, comment=comment).count()
+        return comment.count_likes()
 
     def get_dislikes_count(self, comment):
-        return Grade.objects.filter(is_dislike=True, comment=comment).count()
+        return comment.count_dislikes()
+
+
+class AdvertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Advert
+        fields = ['url', 'image', 'view_count', 'owner', 'created_at']
+
+    owner = UserSerializer()

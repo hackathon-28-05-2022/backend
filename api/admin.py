@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from api.models import User, Post, Comment, Grade
+from api.models import User, Post, Comment, Grade, Advert
 
 
 @admin.register(User)
@@ -21,4 +21,9 @@ class CommentAdmin(admin.ModelAdmin):
 
 @admin.register(Grade)
 class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id',)
+
+
+@admin.register(Advert)
+class AdvertAdmin(admin.ModelAdmin):
     list_display = ('id',)
